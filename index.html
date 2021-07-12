@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      p {
+        white-space: pre-line;
+      }
+      div {
+        user-select: none;
+      }
+      .rs {
+        width: 50vw;
+        height: 100px;
+        background-color: bisque;
+        position: absolute;
+      }
+    </style>
+  </head>
+  <body>
+    <p id="rs"></p>
+    <input type="text" id="text" />
+    <div id="line-w"></div>
+
+    <script>
+      let tmp = "";
+      var client = new XMLHttpRequest();
+      client.open("GET", "/av.txt");
+      client.addEventListener("load", handleEvent);
+      let z = null;
+      function handleEvent() {
+        tmp = client.responseText;
+        z = JSON.parse(tmp);
+      }
+      client.send();
+      let txt = document.getElementById("text");
+      txt.oninput = (e) => {
+        let str = txt.value.toLowerCase();
+        let w = document.getElementById("line-w");
+        w.innerHTML = "";
+        for (let i = 0; i < z.length; i++) {
+          let element = z[i].name;
+          let element2 = z[i].name.toLowerCase();
+          if (element2.startsWith(str) && str != "") {
+            update(element);
+          }
+        }
+      };
+      function update(e) {
+        let d = document.createElement("div");
+        d.innerText = e;
+        d.classList = ["line"];
+        d.onclick = () => {
+          clickHandler(d);
+        };
+        document.getElementById("line-w").appendChild(d);
+      }
+      function clickHandler(d) {
+        let str = d.innerText;
+        for (let i = 0; i < z.length; i++) {
+          const element = z[i];
+          if (element.name.toLowerCase().startsWith(str.toLowerCase())) {
+            let arr = element.location.split("\n");
+            console.log(arr);
+            let rss = "";
+            rss += element.name + "\n";
+            for (let j = 0; j < arr.length; j++) {
+              const element2 = arr[j];
+              if (element2.startsWith("[Recom")) {
+                rss += element2;
+                rss += "\n";
+              }
+            }
+            for (let j = 0; j < arr.length; j++) {
+              const element2 = arr[j];
+              if (!element2.startsWith("[Recom")) {
+                rss += element2;
+                rss += "\n";
+              }
+            }
+            alert(rss);
+          }
+        }
+      }
+    </script>
+  </body>
+</html>
