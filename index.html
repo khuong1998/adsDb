@@ -18,17 +18,33 @@
         background-color: bisque;
         position: absolute;
       }
+      input {
+        display: block;
+      }
+      .line {
+        border: 2px solid pink;
+        margin-top: 10px;
+        padding: 10px;
+      }
     </style>
   </head>
   <body>
     <p id="rs"></p>
     <input type="text" id="text" />
-    <div id="line-w"></div>
+    <div style="border: 2px solid green; margin-top: 10px; padding: 10px">
+      Shiki
+      <div class="line-w" id="line-w"></div>
+    </div>
+
+    <div style="border: 2px solid green; margin-top: 10px; padding: 10px">
+      Clue
+      <div class="line-w" id="line-w2"></div>
+    </div>
 
     <script>
       let tmp = "";
       var client = new XMLHttpRequest();
-      client.open("GET", "./av.txt");
+      client.open("GET", "./av (1).txt");
       client.addEventListener("load", handleEvent);
       let z = null;
       function handleEvent() {
@@ -40,31 +56,54 @@
       txt.oninput = (e) => {
         let str = txt.value.toLowerCase();
         let w = document.getElementById("line-w");
+        let w2 = document.getElementById("line-w2");
         w.innerHTML = "";
+        w2.innerHTML = "";
         for (let i = 0; i < z.length; i++) {
           let element = z[i].name;
           let element2 = z[i].name.toLowerCase();
+          let clue = z[i].clue;
+          let clue2 = z[i].clue.toLowerCase();
+
           if (element2.startsWith(str) && str != "") {
-            update(element);
+            update(element, 0);
+          }
+          if (clue2.includes(str) && str != "") {
+            update(clue, 1);
+            console.log(clue2);
           }
         }
       };
-      function update(e) {
-        let d = document.createElement("div");
-        d.innerText = e;
-        d.classList = ["line"];
-        d.onclick = () => {
-          clickHandler(d);
-        };
-        document.getElementById("line-w").appendChild(d);
+      function update(e, p) {
+        if (p == 0) {
+          let d = document.createElement("div");
+          d.innerText = e;
+          d.classList = ["line"];
+          d.onclick = () => {
+            clickHandler(d);
+          };
+          document.getElementById("line-w").appendChild(d);
+        }
+        if (p == 1) {
+          let d2 = document.createElement("div");
+          d2.innerText = e;
+          d2.classList = ["line"];
+          d2.onclick = () => {
+            clickHandler(d2);
+          };
+          document.getElementById("line-w2").appendChild(d2);
+        }
       }
       function clickHandler(d) {
         let str = d.innerText;
         for (let i = 0; i < z.length; i++) {
           const element = z[i];
-          if (element.name.toLowerCase().startsWith(str.toLowerCase())) {
+          if (
+            element.name.toLowerCase().startsWith(str.toLowerCase()) ||
+            element.clue.toLowerCase().startsWith(str.toLowerCase())
+          ) {
             let arr = element.location.split("\n");
-            console.log(arr);
+            // console.log(arr);
             let rss = "";
             rss += element.name + "\n";
             for (let j = 0; j < arr.length; j++) {
