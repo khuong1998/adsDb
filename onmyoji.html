@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        background-color: rgb(0, 0, 0);
+        user-select: none;
+        cursor: pointer;
+      }
+
+      .card {
+        display: inline-block;
+        color: white;
+        border: 2px solid pink;
+        padding: 30px;
+        text-align: center;
+        font-family: sans-serif;
+        margin: 0;
+      }
+      .ssr {
+        color: yellow;
+        text-shadow: 0px 0px 4px yellow;
+      }
+      .sr {
+        color: rgb(255, 0, 170);
+        text-shadow: 0px 0px 4px rgb(255, 0, 170);
+      }
+      .r {
+        color: rgba(0, 132, 255, 0.994);
+        text-shadow: 0px 0px 4px rgba(0, 132, 255, 0.994);
+      }
+      .button1 {
+        color: green;
+        border: 2px solid green;
+        padding: 10px;
+        text-align: center;
+        font-family: sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="rs">
+      <div class="card">
+        <div class="ssr">SSR</div>
+        <div>Shiki name</div>
+      </div>
+    </div>
+    <div class="button1">Summon</div>
+
+    <script>
+      let hidden = "none";
+      let show = "inline-block";
+      let card = document.getElementsByClassName("card")[0];
+      card.style.display = hidden;
+      for (let i = 0; i < 10; i++) {
+        let c = card.cloneNode(true);
+        c.style.margin = "4px";
+        c.style.display = show;
+        document.getElementsByClassName("rs")[0].appendChild(c);
+      }
+      let ssr = 12;
+      let sr = 213;
+      let r = 1000;
+      let count = 0;
+      let user = 0;
+      function rs() {
+        user = Math.random() * 1000;
+        user = Math.floor(user);
+        if (user == 0) {
+          rs();
+        }
+        if (user >= 1 && user <= ssr) {
+          //   console.log("ssr: " + user);
+          return "ssr";
+        }
+        if (user >= 13 && user <= sr) {
+          //   console.log("sr: " + user);
+          return "sr";
+        }
+        if (user >= 214 && user <= r) {
+          //   console.log("r: " + user);
+          return "r";
+        }
+      }
+      let kq = [];
+      document.getElementsByClassName("button1")[0].onclick = () => {
+        kq = [];
+        for (let i = 0; i < 10; i++) {
+          kq.push(rs());
+        }
+        update();
+        console.log(kq);
+        count += 10;
+        for (let i = 0; i < kq.length; i++) {
+          if (kq[i].startsWith("ssr")) {
+            console.log(count);
+            alert("So lan da tieu hao: " + count);
+            count = 0;
+
+            return;
+          }
+        }
+      };
+      function update() {
+        document.getElementsByClassName("rs")[0].innerHTML = "";
+        for (let i = 0; i < 10; i++) {
+          let c = card.cloneNode(true);
+          c.style.margin = "4px";
+          c.style.display = show;
+          c.children[0].classList = [kq[i]];
+          c.children[0].innerText = kq[i].toUpperCase();
+          document.getElementsByClassName("rs")[0].appendChild(c);
+        }
+      }
+    </script>
+  </body>
+</html>
