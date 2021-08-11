@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="c"></canvas>
+    <audio src="" id="audio"></audio>
+    <input type="file" id="file" />
+    <script>
+      let files = file.files;
+      let ready = 0;
+      file.onchange = () => {
+        file = file.files[0];
+        audio.src = URL.createObjectURL(file);
+        ready = 1;
+      };
+      var ctx = c.getContext("2d");
+      c.height = 500;
+      ctx.fillRect(0, 0, 100, 100);
+      window.addEventListener("mousedown", (e) => {
+        play(e);
+      });
+      var actx;
+      var src;
+      var analyserNode;
+      var sample = new Float32Array(128);
+      function init() {
+        actx = new AudioContext();
+        src = actx.createMediaElementSource(audio);
+        analyserNode = actx.createAnalyser();
+        src.connect(analyserNode);
+        analyserNode.connect(actx.destination);
+        analyserNode.fftSize = 128;
+      }
+      function play(e) {
+        if (audio.paused && e.button == 0 && ready == 1) {
+          if (actx == undefined) {
+            init();
+            update();
+          }
+          audio.play();
+        } else {
+          audio.pause();
+        }
+      }
+      var w = 100;
+      var h = 100;
+      var sum = 0;
+      var star = 35;
+      var end = 44;
+      var star2 = 0;
+      var end2 = 10;
+      var thress = 50;
+      function update() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        analyserNode.getFloatFrequencyData(sample);
+        sum = 0;
+        let count = 0;
+        let sum2 = 0;
+        let count2 = 0;
+        for (let i = 0; i < 128; i++) {
+          if (i > star && i < end) {
+            sum += -sample[i];
+            count += 1;
+          }
+
+          if (i > star2 && i < end2) {
+            sum2 += -sample[i];
+            count2 += 1;
+          }
+        }
+        let avg = sum / count;
+        let avg2 = sum2 / count2;
+        var tmp = avg;
+        if (avg > 200) {
+          avg = 200;
+        }
+        if (avg2 > 180) {
+          avg2 = 180;
+        }
+        ctx.fillStyle = "black";
+        ctx.fillRect(100 - avg / 2, 100 - avg / 2, avg, avg);
+        ctx.fillStyle = "white";
+        ctx.fillRect(100 - avg2 / 2, 100 - avg2 / 2, avg2, avg2);
+        if (avg > thress) {
+          console.log(avg);
+        }
+        // w += 0.1;
+        // h += 0.1;
+        // ctx.fillRect(100 - w / 2, 100 - w / 2, w, h);
+        requestAnimationFrame(update);
+      }
+      function drawSq() {
+        a = 1;
+        console.log(a);
+      }
+    </script>
+  </body>
+</html>
