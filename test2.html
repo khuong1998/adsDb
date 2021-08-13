@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        background-color: black;
+        overflow: hidden;
+      }
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      input[type="file"] {
+        display: block;
+      }
+      .option {
+        padding: 10px;
+        user-select: none;
+        cursor: pointer;
+      }
+      .sqaure {
+        padding: 10px;
+      }
+      .sqaure div {
+        padding: 10px;
+        background-color: bisque;
+      }
+      .popup {
+        font-family: sans-serif;
+        background-color: cornsilk;
+        position: absolute;
+        display: none;
+        padding: 10px;
+      }
+      td {
+        padding: 0;
+        background-color: cornsilk;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="popup">
+      <div style="text-align: center; font-family: sans-serif">Circle 1</div>
+      <table>
+        <tr>
+          <td>x:</td>
+          <td><input type="text" /></td>
+        </tr>
+        <tr>
+          <td>y:</td>
+          <td><input type="text" /></td>
+        </tr>
+        <tr>
+          <td>start:</td>
+          <td><input type="text" /></td>
+        </tr>
+        <tr>
+          <td>end:</td>
+          <td><input type="text" /></td>
+        </tr>
+        <tr>
+          <td>scale:</td>
+          <td><input type="text" /></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <button id="okbtn" style="width: 100%">OK</button>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <canvas id="c"></canvas>
+    <audio src="#" id="audio"></audio>
+    <input type="file" id="file" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      //Variable
+      var ready = 0;
+      c.height = 500;
+      c.width = window.innerWidth;
+      var ctx = c.getContext("2d");
+      var actx, src, analyserNode;
+      var sample = new Uint8Array(128);
+      var circles = [];
+      var highestAmp = 0;
+
+      //function
+      function init() {
+        actx = new AudioContext();
+        src = actx.createMediaElementSource(audio);
+        analyserNode = actx.createAnalyser();
+        src.connect(analyserNode);
+        analyserNode.connect(actx.destination);
+        analyserNode.smoothingTimeConstant = 0.93;
+      }
+
+      function getAvgRange(from, to, sample) {
+        let sum = 0;
+        count = 0;
+        for (let i = from; i <= to; i++) {
+          sum += sample[i];
+          count++;
+        }
+
+        return sum / count;
+      }
+
+      function close(popup) {
+        let index = popup.children[0].innerHTML.charAt(7);
+        circles[index].x =
+          popup.children[1].children[0].children[0].children[1].children[0].value;
+        circles[index].y =
+          popup.children[1].children[0].children[1].children[1].children[0].value;
+        let start =
+          popup.children[1].children[0].children[2].children[1].children[0]
+            .value;
+        let end =
+          popup.children[1].children[0].children[3].children[1].children[0]
+            .value;
+        circles[index].scale =
+          popup.children[1].children[0].children[4].children[1].children[0].value;
+
+        circles[index].setRange(start, end);
+        console.log(circles[index]);
+        popup.style.display = "none";
+      }
+      function open(c, i) {
+        let popup = document.getElementsByClassName("popup")[0];
+        let x = window.innerWidth / 2;
+        let y = window.innerHeight / 2;
+        console.log(x - popup.offsetWidth / 2);
+        popup.style.display = "block";
+        popup.style.top = y - popup.offsetHeight / 2 + "px";
+        popup.style.left = x - popup.offsetWidth / 2 + "px";
+        popup.children[0].innerHTML = "Circle " + i;
+        popup.children[1].children[0].children[0].children[1].children[0].value =
+          c.x;
+        popup.children[1].children[0].children[1].children[1].children[0].value =
+          c.y;
+        popup.children[1].children[0].children[2].children[1].children[0].value =
+          c.start;
+        popup.children[1].children[0].children[3].children[1].children[0].value =
+          c.end;
+        popup.children[1].children[0].children[4].children[1].children[0].value =
+          c.scale;
+      }
+      okbtn.onclick = () => {
+        let popup = document.getElementsByClassName("popup")[0];
+        close(popup);
+      };
+      function translate(x, y) {
+        for (let i = 0; i < circles.length; i++) {
+          let c = circles[i];
+          c.x += x;
+          c.y += y;
+        }
+      }
+
+      //Class
+      class Square {
+        constructor(x, y, size) {
+          this.x = x;
+          this.y = y;
+          this.size = size;
+        }
+      }
+
+      class Circle {
+        constructor(x, y, size) {
+          this.x = x;
+          this.y = y;
+          this.size = size;
+          this.color = "green";
+          this.start = 0;
+          this.end = 2;
+          this.minSize = 50;
+          this.scale = 1;
+        }
+        update() {
+          this.draw();
+        }
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI, false);
+          // ctx.fillStyle = this.color;
+          // ctx.fill();
+          ctx.lineWidth = 6;
+          ctx.strokeStyle = this.color;
+          ctx.stroke();
+        }
+        setRange(from, to) {
+          this.start = from;
+          this.end = to;
+        }
+      }
+
+      //Other
+      file.onchange = () => {
+        let f = file.files[0];
+        audio.src = window.URL.createObjectURL(f);
+        ready = 1;
+        if (actx == undefined) {
+          init();
+          update();
+        }
+      };
+      //init
+      let tmp = new Circle(200, 200, 50);
+      tmp.start = 39;
+      tmp.end = 45;
+      circles.push(tmp);
+
+      let tmp3 = new Circle(600, 200, 50);
+      tmp3.start = 39;
+      tmp3.end = 45;
+      circles.push(tmp3);
+
+      let tmp2 = new Circle(400, 200, 50);
+      tmp2.start = 0;
+      tmp2.end = 10;
+      circles.push(tmp2);
+
+      translate(window.innerWidth / 2 - tmp2.x, 500 / 2 - tmp2.y);
+      //Update
+      function update() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        analyserNode.getByteFrequencyData(sample);
+
+        for (let i = 0; i < circles.length; i++) {
+          let size = 0;
+          size = getAvgRange(circles[i].start, circles[i].end, sample);
+          circles[i].size =
+            (getAvgRange(circles[i].start, circles[i].end, sample) / 2) *
+            circles[i].scale;
+          circles[i].color = "rgb(" + size + ",0,0)";
+
+          circles[i].update();
+        }
+
+        requestAnimationFrame(update);
+      }
+
+      //Event Register
+      window.addEventListener("keydown", (e) => {
+        if (e.keyCode == 32 && ready == 1) {
+          console.log(123);
+          if (audio.paused) {
+            audio.play();
+          } else {
+            audio.pause();
+          }
+        }
+        if (e.keyCode == 67) {
+          audio.currentTime = 205;
+        }
+        // console.log(e.keyCode);
+      });
+      c.addEventListener("mousedown", (e) => {
+        // console.log(e);
+        if (e.button == 0) {
+          let x = e.clientX;
+          let y = e.clientY;
+          for (let i = 0; i < circles.length; i++) {
+            let c = circles[i];
+            let t = (c.x - x) * (c.x - x) + (c.y - y) * (c.y - y);
+            let d = Math.sqrt(t);
+            if (d < c.size) {
+              open(c, i);
+            }
+          }
+        }
+      });
+      window.onresize = () => {
+        translate(window.innerWidth / 2 - circles[2].x, 0);
+        console.log(circles[0].x);
+        console.log(circles[1].x);
+        console.log(circles[2].x);
+        c.width = innerWidth;
+      };
+    </script>
+  </body>
+</html>
